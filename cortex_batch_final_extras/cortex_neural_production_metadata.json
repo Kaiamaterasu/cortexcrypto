@@ -1,0 +1,12 @@
+{
+  "model_name": "cortex_neural_production",
+  "created_at": 1756643276.2763634,
+  "architecture": "49->64->32->32",
+  "training_samples": "500+ synthetic",
+  "inference_time_ms": 0.7,
+  "files": {
+    "python_model": "models/cortex_neural_production.json",
+    "c_header": "models/cortex_neural_production.h",
+    "c_implementation": "models/cortex_neural_production.c"
+  }
+}

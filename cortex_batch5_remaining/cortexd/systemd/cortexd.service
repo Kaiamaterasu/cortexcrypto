@@ -1,0 +1,44 @@
+[Unit]
+Description=CortexCrypt Daemon - Neural-augmented encryption service
+Documentation=file:///usr/local/share/doc/cortexcrypt/README.md
+After=network.target
+Wants=network.target
+
+[Service]
+Type=forking
+User=cortex
+Group=cortex
+ExecStart=/usr/local/bin/cortexd --daemon --models /usr/local/share/cortexcrypt/models
+ExecReload=/bin/kill -HUP $MAINPID
+PIDFile=/run/cortexd.pid
+Restart=on-failure
+RestartSec=5
+StartLimitInterval=60
+StartLimitBurst=3
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/run/cortex /var/log/cortex
+ProtectControlGroups=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+RemoveIPC=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+# Resource limits
+LimitNOFILE=1024
+LimitNPROC=64
+MemoryHigh=256M
+MemoryMax=512M
+
+# Environment
+Environment=CORTEX_MODELS_DIR=/usr/local/share/cortexcrypt/models
+Environment=CORTEX_LOG_LEVEL=INFO
+
+[Install]
+WantedBy=multi-user.target

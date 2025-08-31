@@ -1,0 +1,29 @@
+[package]
+name = "cortexcrypt"
+version = "1.0.0"
+edition = "2021"
+authors = ["CortexCrypt Contributors"]
+license = "Apache-2.0"
+description = "CortexCrypt Rust SDK - Zero-cost, offline, NN-augmented encryption"
+repository = "https://github.com/cortexcrypt/cortexcrypt"
+keywords = ["cryptography", "encryption", "neural-networks", "security"]
+categories = ["cryptography"]
+
+[dependencies]
+libc = "0.2"
+thiserror = "1.0"
+
+[build-dependencies]
+bindgen = "0.69"
+pkg-config = "0.3"
+
+[dev-dependencies]
+tempfile = "3.0"
+
+[lib]
+name = "cortexcrypt"
+path = "src/lib.rs"
+
+[[example]]
+name = "basic"
+path = "examples/basic.rs"
