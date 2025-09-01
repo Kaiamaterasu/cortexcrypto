@@ -1,6 +1,6 @@
 # 🧠⚡ CortexCrypto - Neural-Augmented Encryption
 
-![CortexCrypto Banner](https://img.shields.io/badge/CortexCrypto-Neural%20Encryption-red?style=for-the-badge) ![License]![Tests](https://img.shields.io/badge/Tests-100%25%20Pass-green?style=for-the-badge)
+![CortexCrypto Banner](https://img.shields.io/badge/CortexCrypto-Neural%20Encryption-red?style=for-the-badge)[Tests](https://img.shields.io/badge/Tests-100%25%20Pass-green?style=for-the-badge)
 
 > ⚠️ **PROTOTYPE WARNING**: This is experimental research software. It WILL fail on many systems and requires developer knowledge to use effectively. Don't expect plug-and-play - this is for hackers and researchers who understand the risks.
 
