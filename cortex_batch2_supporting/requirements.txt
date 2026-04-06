@@ -2,14 +2,14 @@
 # Neural-Augmented Encryption System
 
 # Core cryptography libraries
-cryptography>=46.0.5
+cryptography>=46.0.6
 pycryptodome>=3.15.0
 
 # Password hashing
 argon2-cffi>=21.3.0
 
 # Neural network support (fallback available if not installed)
-numpy>=1.21.0
+numpy>=1.22.2
 
 # Optional: Hardware-accelerated neural inference
 # onnxruntime>=1.12.0
