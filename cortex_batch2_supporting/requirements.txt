@@ -2,7 +2,7 @@
 # Neural-Augmented Encryption System
 
 # Core cryptography libraries
-cryptography>=3.4.8
+cryptography>=46.0.5
 pycryptodome>=3.15.0
 
 # Password hashing
