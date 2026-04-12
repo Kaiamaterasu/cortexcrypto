@@ -111,6 +111,33 @@
 
 ---
 
+### Level 51: ⚠️ BREAK POINT REACHED ⚠️
+| Level | Attack | Resistance | Status |
+|-------|--------|------------|--------|
+| 51 | **Weak Key Exhaustion** | **40/100** | **❌ BREACHED** |
+
+**VULNERABILITY FOUND**: System accepts weak passwords that can be guessed
+
+---
+
+## ⚠️ SYSTEM COMPROMISED AT LEVEL 51
+
+### Attack Details That Caused the Break
+- **Attack**: Weak Key Exhaustion (trying common passwords)
+- **Method**: Dictionary of top weak passwords
+- **Weakness**: No password strength validation
+- **Password Cracked**: `123456`
+
+### Improvement Recommendations
+1. Implement password strength validation (min 12 chars)
+2. Add weak password blacklist
+3. Implement rate limiting on decryption attempts
+4. Calculate password entropy and reject low-entropy passwords
+
+See `why_i_broke.md` for full analysis and remediation.
+
+---
+
 ## Final Analysis
 
 ### Security Score Breakdown

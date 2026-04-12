@@ -6,6 +6,7 @@ CortexCrypt Standalone Mode - Neural Augmented Encryption without Daemon
 import os
 import sys
 import hashlib
+import math
 import argparse
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
@@ -57,9 +58,50 @@ class CortexCryptStandalone:
         final_key = hashlib.sha256(base_key + neural_output).digest()
         return final_key
     
+    def validate_password_strength(self, password: str) -> bool:
+        """Validate password meets minimum strength requirements"""
+        
+        weak_passwords = [
+            '123456', 'password', '12345678', 'qwerty', '123456789',
+            '12345', '1234', '111111', '1234567', 'dragon', 'letmein',
+            'admin', 'welcome', 'monkey', 'master', 'abc123', '0000',
+            'pass', 'test', 'guest', 'shadow', 'sunshine', 'princess',
+            'football', 'baseball', 'soccer', 'killer', 'trustno1',
+            'iloveyou', 'superman', 'batman', 'passw0rd', 'hello'
+        ]
+        
+        # Check minimum length
+        if len(password) < 8:
+            print("⚠️  Password too short (minimum 8 characters)")
+            return False
+        
+        # Check against weak password blacklist
+        if password.lower() in weak_passwords:
+            print("⚠️  Password is too common (weak password detected)")
+            return False
+        
+        # Calculate entropy
+        charset_size = 0
+        if any(c.islower() for c in password): charset_size += 26
+        if any(c.isupper() for c in password): charset_size += 26
+        if any(c.isdigit() for c in password): charset_size += 10
+        if any(c in '!@#$%^&*()_+-=[]{}|;:,.<>?/~`' for c in password): charset_size += 32
+        
+        if charset_size > 0:
+            entropy = len(password) * math.log2(charset_size)
+            if entropy < 28:  # ~28 bits = weak
+                print(f"⚠️  Password entropy too low ({entropy:.1f} bits, minimum 28)")
+                return False
+        
+        return True
+    
     def encrypt_file(self, input_path: str, output_path: str, password: str, 
                     bind_policy: str = "machine", note: str = ""):
         """Encrypt file to .cortex format"""
+        
+        # Validate password strength BEFORE encryption
+        if not self.validate_password_strength(password):
+            raise ValueError("Password does not meet minimum strength requirements")
         
         # Generate salts and binding
         file_salt = secrets.token_bytes(16)
