@@ -51,8 +51,8 @@ static int get_volume_info(const char* path, char* uuid, char* fs_uuid, char* la
             if (strncmp(abs_path, mount_point, mount_len) == 0 && 
                 (mount_len == 1 || abs_path[mount_len] == '/' || abs_path[mount_len] == '\0') &&
                 mount_len > best_match_len) {
-                strcpy(best_device, device);
-                strcpy(best_mount, mount_point);
+                snprintf(best_device, 64, "%s", device);
+                snprintf(best_mount, 64, "%s", mount_point);
                 best_match_len = mount_len;
             }
         }
@@ -67,7 +67,7 @@ static int get_volume_info(const char* path, char* uuid, char* fs_uuid, char* la
         return -1;
     }
     
-    strcpy(device, best_device);
+    snprintf(device, 64, "%s", best_device);
     
     /* Use blkid to get UUID and label */
     blkid_cache cache;

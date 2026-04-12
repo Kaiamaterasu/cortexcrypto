@@ -32,7 +32,7 @@ int daemon_init(daemon_ctx_t* ctx, const char* models_dir) {
     if (models_dir) {
         strncpy(ctx->models_dir, models_dir, sizeof(ctx->models_dir) - 1);
     } else {
-        strcpy(ctx->models_dir, "/usr/local/share/cortexcrypt/models");
+        snprintf(ctx->models_dir, sizeof(ctx->models_dir), "%s", "/usr/local/share/cortexcrypt/models");
     }
     
     /* Initialize mutex */
