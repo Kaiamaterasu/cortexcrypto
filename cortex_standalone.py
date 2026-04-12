@@ -70,7 +70,15 @@ class CortexCryptStandalone:
             'iloveyou', 'superman', 'batman', 'passw0rd', 'hello',
             # Additional weak patterns
             'aaaaaaaa', 'bbbbbbbb', 'cccccccc', 'dddddddd', 'eeeeeeee',
-            'aaaaaaaaaaaa', '11111111', '22222222', 'password1', 'password12'
+            'aaaaaaaaaaaa', '11111111', '22222222', 'password1', 'password12',
+            # Common patterns
+            'qwertyuiop', 'asdfghjkl', 'zxcvbnm', 'qazwsxedc',
+            # Common names
+            'michael', 'jennifer', 'jordan', 'ashley', 'daniel',
+            # Year patterns
+            'password2020', 'password2021', 'password2022', 'password2023', 'password2024',
+            'admin2020', 'admin2021', 'admin2022', 'admin2023', 'admin2024',
+            '1234567890', '0987654321',
         ]
         
         # Check minimum length
@@ -86,6 +94,22 @@ class CortexCryptStandalone:
         # Check for repeating characters (e.g., 'aaaaaaaa')
         if len(set(password)) == 1:
             print("⚠️  Password has repeating characters")
+            return False
+        
+        # Check for year patterns (e.g., 'password2024', 'Secure2023')
+        import re
+        year_pattern = re.search(r'(19|20)\d{2}$|(19|20)\d{2}', password)
+        if year_pattern and len(password) < 14:
+            # If it ends with a year and is otherwise simple, reject
+            print("⚠️  Password contains common year pattern")
+            return False
+        
+        # Check for common word + number patterns (e.g., 'hello123', 'user123')
+        word_num_patterns = ['hello123', 'test123', 'user123', 'root123', 'admin123', 
+                            'pass123', 'guest123', 'master123', 'love123', 'secret123',
+                            'super123', 'welcome123', 'dragon123', 'shadow123', 'sunshine123']
+        if password.lower() in word_num_patterns:
+            print("⚠️  Password is a common word with numbers")
             return False
         
         # Check if password looks like a file path
@@ -116,6 +140,14 @@ class CortexCryptStandalone:
         if has_consecutive and len(set(lower)) < 6:
             print("⚠️  Password contains sequential characters")
             return False
+        
+        # Check for keyboard patterns (qwerty, asdf, zxcz, etc.)
+        keyboard_patterns = ['qwerty', 'asdf', 'zxcv', 'qazwsx', 'wsxedc', 'edcrfv', 'rfvtgb', 'tgbyhn', 'yhnujm', 'ujmik', 'ikolp', 'pl;/[']
+        kp_lower = lower
+        for pattern in keyboard_patterns:
+            if pattern in kp_lower or pattern[::-1] in kp_lower:
+                print("⚠️  Password contains keyboard pattern")
+                return False
         
         # Calculate entropy with PENALTY for character diversity
         charset_size = 0
