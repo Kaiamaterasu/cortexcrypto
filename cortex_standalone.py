@@ -99,8 +99,8 @@ class CortexCryptStandalone:
         # Check for year patterns (e.g., 'password2024', 'Secure2023')
         import re
         year_pattern = re.search(r'(19|20)\d{2}$|(19|20)\d{2}', password)
-        if year_pattern and len(password) < 14:
-            # If it ends with a year and is otherwise simple, reject
+        if year_pattern and len(password) < 14 and len(set(password)) < 8:
+            # Only reject short passwords that are mostly simple with a year
             print("⚠️  Password contains common year pattern")
             return False
         
@@ -160,6 +160,12 @@ class CortexCryptStandalone:
         if has_upper: charset_size += 26
         if has_digit: charset_size += 10
         if has_special: charset_size += 32
+        
+        # Require at least 2 character types
+        char_types = sum([has_lower, has_upper, has_digit, has_special])
+        if char_types < 2:
+            print("⚠️  Password must contain at least 2 character types")
+            return False
         
         # Count unique characters (more unique = better)
         unique_chars = len(set(password))
