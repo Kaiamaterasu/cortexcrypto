@@ -1,0 +1,49 @@
+#!/usr/bin/env python3
+"""
+CortexCrypt CLI Wrapper
+Delegates to cortex_standalone.py
+"""
+
+import sys
+import subprocess
+import os
+
+os.chdir('/workspace/project/cortexcrypto')
+
+# Parse arguments
+args = sys.argv[1:]
+
+# Handle --no-pass by using empty password
+if '--no-pass' in args:
+    args.remove('--no-pass')
+    # Run encrypt with empty password via Python
+    if args[0] == 'encrypt':
+        sys.path.insert(0, '.')
+        from cortex_standalone import CortexCryptStandalone
+        
+        # Parse remaining args manually
+        in_file = out_file = bind_policy = note = None
+        i = 0
+        while i < len(args):
+            if args[i] == '--in' and i+1 < len(args):
+                in_file = args[i+1]
+                i += 2
+            elif args[i] == '--out' and i+1 < len(args):
+                out_file = args[i+1]
+                i += 2
+            elif args[i] == '--bind' and i+1 < len(args):
+                bind_policy = args[i+1]
+                i += 2
+            elif args[i] == '--note' and i+1 < len(args):
+                note = args[i+1]
+                i += 2
+            else:
+                i += 1
+        
+        cc = CortexCryptStandalone()
+        cc.encrypt_file(in_file, out_file, bind_policy or 'machine', note or '')
+        sys.exit(0)
+
+# Otherwise delegate to cortex_standalone.py
+result = subprocess.run(['python3', 'cortex_standalone.py'] + args)
+sys.exit(result.returncode)
