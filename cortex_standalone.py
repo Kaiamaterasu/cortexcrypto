@@ -67,7 +67,10 @@ class CortexCryptStandalone:
             'admin', 'welcome', 'monkey', 'master', 'abc123', '0000',
             'pass', 'test', 'guest', 'shadow', 'sunshine', 'princess',
             'football', 'baseball', 'soccer', 'killer', 'trustno1',
-            'iloveyou', 'superman', 'batman', 'passw0rd', 'hello'
+            'iloveyou', 'superman', 'batman', 'passw0rd', 'hello',
+            # Additional weak patterns
+            'aaaaaaaa', 'bbbbbbbb', 'cccccccc', 'dddddddd', 'eeeeeeee',
+            'aaaaaaaaaaaa', '11111111', '22222222', 'password1', 'password12'
         ]
         
         # Check minimum length
@@ -80,17 +83,52 @@ class CortexCryptStandalone:
             print("⚠️  Password is too common (weak password detected)")
             return False
         
-        # Calculate entropy
+        # Check for repeating characters (e.g., 'aaaaaaaa')
+        if len(set(password)) == 1:
+            print("⚠️  Password has repeating characters")
+            return False
+        
+        # Check for sequential characters (e.g., 'abcdefgh' or '12345678')
+        # Only reject if password is mostly sequential (4+ chars in sequence)
+        lower = password.lower()
+        has_consecutive = False
+        
+        # Check for numeric sequences
+        for i in range(len(lower) - 3):
+            substr = lower[i:i+4]
+            if substr.isdigit() or substr.isalpha():
+                # Check if it's a sequence
+                if substr in '0123456789' or substr in 'abcdefghijklmnopqrstuvwxyz':
+                    has_consecutive = True
+                    break
+        
+        # Only reject if all/nearly all characters are sequential
+        if has_consecutive and len(set(lower)) < 6:
+            print("⚠️  Password contains sequential characters")
+            return False
+        
+        # Calculate entropy with PENALTY for character diversity
         charset_size = 0
-        if any(c.islower() for c in password): charset_size += 26
-        if any(c.isupper() for c in password): charset_size += 26
-        if any(c.isdigit() for c in password): charset_size += 10
-        if any(c in '!@#$%^&*()_+-=[]{}|;:,.<>?/~`' for c in password): charset_size += 32
+        has_lower = any(c.islower() for c in password)
+        has_upper = any(c.isupper() for c in password)
+        has_digit = any(c.isdigit() for c in password)
+        has_special = any(c in '!@#$%^&*()_+-=[]{}|;:,.<>?/~`' for c in password)
+        
+        if has_lower: charset_size += 26
+        if has_upper: charset_size += 26
+        if has_digit: charset_size += 10
+        if has_special: charset_size += 32
+        
+        # Count unique characters (more unique = better)
+        unique_chars = len(set(password))
         
         if charset_size > 0:
             entropy = len(password) * math.log2(charset_size)
-            if entropy < 28:  # ~28 bits = weak
-                print(f"⚠️  Password entropy too low ({entropy:.1f} bits, minimum 28)")
+            # Add bonus for unique characters
+            entropy += unique_chars * 2
+            
+            if entropy < 40:  # Increased threshold
+                print(f"⚠️  Password entropy too low ({entropy:.1f} bits, minimum 40)")
                 return False
         
         return True
