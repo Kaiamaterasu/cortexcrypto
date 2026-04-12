@@ -10,6 +10,7 @@ import subprocess
 import time
 import hashlib
 import tempfile
+import glob
 
 class PerfectScoreTestSuite:
     def __init__(self):
@@ -569,7 +570,7 @@ class PerfectScoreTestSuite:
         ]
         
         for pattern in patterns:
-            os.system(f"rm -f {pattern} 2>/dev/null")
+            import glob; [os.remove(f) for f in glob.glob(pattern) if os.path.exists(f)]
     
     def generate_perfect_report(self):
         """Generate perfect score report"""

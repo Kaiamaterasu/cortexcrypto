@@ -619,7 +619,13 @@ class CortexCryptTestSuite:
         ]
         
         for pattern in patterns:
-            os.system(f"rm -f {pattern} 2>/dev/null")
+            # SECURITY FIX: Use glob + os.remove instead of os.system
+            import glob
+            for f in glob.glob(pattern):
+                try:
+                    os.remove(f)
+                except:
+                    pass
     
     def generate_report(self):
         """Generate final test report"""
