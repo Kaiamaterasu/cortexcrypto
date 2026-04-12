@@ -79,6 +79,21 @@ class CortexCryptStandalone:
             'password2020', 'password2021', 'password2022', 'password2023', 'password2024',
             'admin2020', 'admin2021', 'admin2022', 'admin2023', 'admin2024',
             '1234567890', '0987654321',
+            # Leetspeak variants
+            'p@ssw0rd', 'p@ssword', 'p@ssw0rd123', 'p@ssword123',
+            's3cr3t', 's3cr3t123', 'S3cr3t', 'S3cr3t123',
+            'l0g1n', 'l0g1n123', 'L0g1n', 'L0g1n123',
+            '1qaz2wsx', '1qazwsx', 'qazwsxedc', 'qazwsx',
+            # More word + number patterns
+            'root1234', 'admin1234', 'user1234', 'test1234', 'guest1234',
+            'shadow1', 'sunshine1', 'dragon1', 'princess1', 'butterfly1',
+            'pizza123', 'coffee123', 'chocolate', 'chocolate1', 'purple1',
+            'tiger1',
+            # OS and software names
+            'windows10', 'windows11', 'macos', 'ubuntu', 'linux',
+            'chrome', 'firefox', 'safari', 'edge', 'opera',
+            'oracle', 'mysql', 'sqlserver', 'postgresql', 'mongodb',
+            'google', 'facebook', 'twitter', 'instagram', 'youtube',
         ]
         
         # Check minimum length
