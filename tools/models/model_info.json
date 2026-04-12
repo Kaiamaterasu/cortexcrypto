@@ -1,0 +1,14 @@
+{{
+    "kdf_mlp": {{
+        "version": "1.0.0",
+        "input_shape": [1, 49],
+        "output_shape": [1, 32],
+        "description": "Multi-layer perceptron for adaptive key derivation"
+    }},
+    "anomaly_autoencoder": {{
+        "version": "1.0.0", 
+        "input_shape": [1, 12],
+        "output_shape": [1, 12],
+        "description": "Autoencoder for real-time anomaly detection"
+    }}
+}}

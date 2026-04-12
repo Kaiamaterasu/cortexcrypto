@@ -1,0 +1,137 @@
+# 🧠⚡ CortexCrypto .gitignore
+# Comprehensive ignore rules for neural-augmented encryption
+
+# Build artifacts
+build/
+*.o
+*.so
+*.a
+*.exe
+*.dll
+*.dylib
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.cmake
+
+# Compiled binaries
+cortexcrypt
+cortexctl
+cortexd
+simple_daemon
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.env
+
+# Neural Network Training
+models/*.json
+models/*.h
+models/*.c
+models/*_metadata.json
+*.onnx
+training_data/
+neural_logs/
+temp_training_*/
+
+# Keep example models for distribution
+!models/example_neural_model.json
+!models/README.md
+
+# Temporary files
+*.tmp
+*.temp
+.DS_Store
+*~
+.#*
+\#*#
+.*.swp
+.*.swo
+
+# IDE files
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Test outputs
+test_output/
+*.cortex
+*.encrypted
+test_*.txt
+benchmark_results.txt
+
+# Logs
+*.log
+logs/
+cortex.log
+daemon.log
+neural_training.log
+
+# Configuration
+config.local.json
+cortex_neural_config.local.json
+local_settings.json
+
+# Secrets and keys (NEVER commit these!)
+*.key
+*.pem
+test_passwords.txt
+secrets/
+keys/
+
+# OS specific
+Thumbs.db
+Desktop.ini
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Archives
+*.tar
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.zip
+*.rar
+*.7z
+
+# Core dumps
+core
+core.*
+vgcore.*
+
+# Profiling
+*.prof
+*.gcda
+*.gcno
+
+# Documentation build
+docs/_build/
+docs/build/
+
+# Package managers
+node_modules/
+vendor/
+target/
+
+# Temporary encryption test files
+temp_encrypt_*
+temp_decrypt_*
+sample_*.txt
+training_sample_*
