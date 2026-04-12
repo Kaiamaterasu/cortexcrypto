@@ -107,7 +107,19 @@ class CortexCryptStandalone:
         # Check for common word + number patterns (e.g., 'hello123', 'user123')
         word_num_patterns = ['hello123', 'test123', 'user123', 'root123', 'admin123', 
                             'pass123', 'guest123', 'master123', 'love123', 'secret123',
-                            'super123', 'welcome123', 'dragon123', 'shadow123', 'sunshine123']
+                            'super123', 'welcome123', 'dragon123', 'shadow123', 'sunshine123',
+                            # Common names + years
+                            'john1980', 'john1990', 'john2000', 'john2020',
+                            'mary1980', 'mary1990', 'mary2000', 'mary2020',
+                            'james1980', 'james1990', 'robert1990', 'michael1990',
+                            'daniel1980', 'david1990', 'william1990', 'richard1990',
+                            'joseph1990', 'thomas1990', 'charles1990', 'christopher1990',
+                            'mark1990', 'steven1990', 'paul1990', 'andrew1990',
+                            'susan1990', 'jennifer1990', 'sarah1990', 'karen1990',
+                            'lisa1990', 'nancy1990', 'betty1990', 'margaret1990',
+                            'sandra1990', 'ashley1990', 'kimberly1990', 'emily1990',
+                            'john123', 'mary123', 'james123', 'robert123', 'michael123',
+                            'david123', 'william123', 'richard123', 'joseph123', 'thomas123']
         if password.lower() in word_num_patterns:
             print("⚠️  Password is a common word with numbers")
             return False
@@ -117,7 +129,12 @@ class CortexCryptStandalone:
             print("⚠️  Password cannot contain path separators")
             return False
         
-        # Check for null bytes or control characters
+        # Check for invalid characters in password
+        if any(ord(c) < 32 for c in password):
+            print("⚠️  Password contains invalid characters")
+            return False
+        
+        # Check for control characters
         if any(ord(c) < 32 for c in password):
             print("⚠️  Password contains invalid characters")
             return False
@@ -167,8 +184,13 @@ class CortexCryptStandalone:
             print("⚠️  Password must contain at least 2 character types")
             return False
         
-        # Count unique characters (more unique = better)
+        # Require minimum unique characters (more unique = harder to guess)
         unique_chars = len(set(password))
+        # For passwords < 12 chars, require more unique chars
+        min_unique = 6 if len(password) < 12 else 4
+        if unique_chars < min_unique:
+            print(f"⚠️  Password must have at least {min_unique} unique characters")
+            return False
         
         if charset_size > 0:
             entropy = len(password) * math.log2(charset_size)
