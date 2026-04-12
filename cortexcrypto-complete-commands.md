@@ -1609,8 +1609,1108 @@ OUTPUT:
 
 ---
 
-**🎉 This is the complete command reference for CortexCrypto with every command, every option, and real examples with outputs!**
+## 🌍 Using CortexCrypto in Other Programming Languages
 
-**Built with ❤️ by [@Kaiamaterasu](https://github.com/Kaiamaterasu)**
+This section shows how to use CortexCrypto from different programming languages.
 
-*Every command demonstrated with actual terminal outputs from the CortexCrypto system*
+### Method 1: Python (Direct Import)
+
+```python
+#!/usr/bin/env python3
+"""
+CortexCrypto Python API - Complete Usage Examples
+======================================
+"""
+import sys
+sys.path.insert(0, '/path/to/cortexcrypto')
+
+from cortex_standalone import CortexCryptStandalone
+
+# Initialize
+cc = CortexCryptStandalone()
+
+# =====================
+# ENCRYPTION
+# =====================
+
+# Method 1: Simple encryption
+result = cc.encrypt_file(
+    input_path='secret.txt',
+    output_path='secret.cortex',
+    password='MyV3ryStr0ngP@ss!',
+    bind_policy='machine',  # or 'volume'
+    note='Confidential document'
+)
+# Returns: 0 on success
+
+# Method 2: With volume binding
+result = cc.encrypt_file(
+    input_path='docs.pdf',
+    output_path='docs.cortex',
+    password='Str0ngP@ss!2024',
+    bind_policy='volume'  # Binds to storage device
+)
+
+# =====================
+# DECRYPTION
+# =====================
+
+# Method 1: Simple decryption
+result = cc.decrypt_file(
+    input_path='secret.cortex',
+    output_path='decrypted.txt',
+    password='MyV3ryStr0ngP@ss!'
+)
+# Returns: 0 on success, -3 on failure
+
+# Method 2: Check rate limit first
+if cc._check_rate_limit('secret.cortex'):
+    result = cc.decrypt_file('secret.cortex', 'out.txt', 'password')
+else:
+    print("Too many failed attempts. Wait 5 minutes.")
+
+# =====================
+# PASSWORD VALIDATION
+# =====================
+
+# Validate password strength
+is_valid = cc.validate_password_strength('MyV3ryStr0ngP@ss!')
+# Returns: True if password is acceptable
+
+# Get weak password count
+weak_pwds = cc._load_weak_passwords()
+print(f"Blocklist contains {len(weak_pwds)} weak passwords")
+
+# =====================
+# SECURITY UTILITIES
+# =====================
+
+# Get machine binding ID
+binding = cc.get_machine_binding()
+print(f"Machine ID: {binding.hex()}")
+
+# Derive encryption key
+key = cc.derive_key(
+    password='password',
+    salt=b'16_byte_salt!',
+    binding_id=b'16_byte_bind!'
+)
+print(f"Derived key: {key.hex()}")
+
+# Check rate limit status
+allowed = cc._check_rate_limit('file.cortex')
+# Returns: True if allowed, False if locked out
+
+# Record failed attempt (for tracking)
+cc._record_failed_attempt('file.cortex')
+
+# Record success (clears failed attempts)
+cc._record_success('file.cortex')
+
+# =====================
+# RETURN CODES
+# =====================
+# 0  = Success
+# -1 = Invalid format
+# -2 = Binding mismatch
+# -3 = Authentication failed (wrong password)
+# -4 = File not found
+
+print("\n✅ Python examples complete!")
+```
+
+---
+
+### Method 2: Node.js/JavaScript
+
+```javascript
+/**
+ * CortexCrypto Node.js API
+ * =====================
+ * Run Python script from Node.js
+ */
+
+const { spawn, execSync } = require('child_process');
+const fs = require('fs');
+const path = require('path');
+
+// Configuration
+const CORTEX_PATH = '/path/to/cortexcrypto';
+const PYTHON = 'python3';
+
+// =====================
+// ENCRYPTION
+// =====================
+
+// Method 1: Simple encryption via Python script
+function encryptFile(inputFile, outputFile, password, bindPolicy = 'machine') {
+    return new Promise((resolve, reject) => {
+        const script = `
+import sys
+sys.path.insert(0, '${CORTEX_PATH}')
+from cortex_standalone import CortexCryptStandalone
+cc = CortexCryptStandalone()
+result = cc.encrypt_file(
+    '${inputFile}',
+    '${outputFile}',
+    '${password}',
+    '${bindPolicy}',
+    ''
+)
+print(result)
+sys.exit(0)
+`;
+        
+        const py = spawn(PYTHON, ['-c', script]);
+        let output = '';
+        
+        py.stdout.on('data', (data) => output += data);
+        py.stderr.on('data', (data) => console.error(data.toString()));
+        
+        py.on('close', (code) => {
+            resolve({ code, output: output.trim() });
+        });
+    });
+}
+
+// Method 2: Synchronous encryption
+function encryptSync(inputFile, outputFile, password, bindPolicy = 'machine') {
+    const script = `
+import sys
+sys.path.insert(0, '${CORTEX_PATH}')
+from cortex_standalone import CortexCryptStandalone
+cc = CortexCryptStandalone()
+result = cc.encrypt_file('${inputFile}', '${outputFile}', '${password}', '${bindPolicy}', '')
+print(result)
+`;
+    
+    try {
+        const output = execSync(`${PYTHON} -c "${script.replace(/"/g, '\\"')}"`, {
+            encoding: 'utf8'
+        });
+        return { success: true, output };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+// =====================
+// DECRYPTION
+// =====================
+
+async function decryptFile(inputFile, outputFile, password) {
+    const script = `
+import sys
+sys.path.insert(0, '${CORTEX_PATH}')
+from cortex_standalone import CortexCryptStandalone
+cc = CortexCryptStandalone()
+result = cc.decrypt_file('${inputFile}', '${outputFile}', '${password}')
+print(result)
+`;
+    
+    return new Promise((resolve, reject) => {
+        const py = spawn(PYTHON, ['-c', script]);
+        let output = '';
+        
+        py.stdout.on('data', (data) => output += data);
+        py.on('close', (code) => {
+            resolve({ code, output: output.trim() });
+        });
+    });
+}
+
+// =====================
+// PASSWORD VALIDATION
+// =====================
+
+function validatePassword(password) {
+    const script = `
+import sys
+sys.path.insert(0, '${CORTEX_PATH}')
+from cortex_standalone import CortexCryptStandalone
+cc = CortexCryptStandalone()
+result = cc.validate_password_strength('${password}')
+print(result)
+`;
+    
+    try {
+        const output = execSync(`${PYTHON} -c "${script}"`, { encoding: 'utf8' });
+        return output.trim() === 'True';
+    } catch {
+        return false;
+    }
+}
+
+// =====================
+// USAGE EXAMPLES
+// =====================
+
+async function main() {
+    // Example 1: Encrypt
+    console.log('Encrypting file...');
+    const encResult = await encryptFile(
+        'secret.txt',
+        'secret.cortex',
+        'MyV3ryStr0ngP@ss!',
+        'machine'
+    );
+    console.log('Encrypted:', encResult);
+    
+    // Example 2: Decrypt
+    console.log('Decrypting file...');
+    const decResult = await decryptFile(
+        'secret.cortex',
+        'decrypted.txt',
+        'MyV3ryStr0ngP@ss!'
+    );
+    console.log('Decrypted:', decResult);
+    
+    // Example 3: Validate password
+    console.log('Validating password...');
+    const isValid = validatePassword('MyV3ryStr0ngP@ss!');
+    console.log('Valid:', isValid);
+}
+
+main().catch(console.error);
+```
+
+---
+
+### Method 3: Java
+
+```java
+import java.io.*;
+import java.nio.file.*;
+
+/**
+ * CortexCrypto Java Integration
+ * ==========================
+ */
+public class CortexCryptoJava {
+    
+    private static final String PYTHON = "python3";
+    private static final String CORTEX_PATH = "/path/to/cortexcrypto";
+    
+    /**
+     * Encrypt a file using CortexCrypto
+     */
+    public static boolean encrypt(
+        String inputFile,
+        String outputFile,
+        String password,
+        String bindPolicy  // "machine" or "volume"
+    ) throws Exception {
+        
+        String script = String.format(
+            "import sys\n" +
+            "sys.path.insert(0, '%s')\n" +
+            "from cortex_standalone import CortexCryptStandalone\n" +
+            "cc = CortexCryptStandalone()\n" +
+            "result = cc.encrypt_file('%s', '%s', '%s', '%s', '')\n" +
+            "print(result)\n",
+            CORTEX_PATH, inputFile, outputFile, password, bindPolicy
+        );
+        
+        return runPython(script) == 0;
+    }
+    
+    /**
+     * Decrypt a file using CortexCrypto
+     */
+    public static boolean decrypt(
+        String inputFile,
+        String outputFile,
+        String password
+    ) throws Exception {
+        
+        String script = String.format(
+            "import sys\n" +
+            "sys.path.insert(0, '%s')\n" +
+            "from cortex_standalone import CortexCryptStandalone\n" +
+            "cc = CortexCryptStandalone()\n" +
+            "result = cc.decrypt_file('%s', '%s', '%s')\n" +
+            "print(result)\n",
+            CORTEX_PATH, inputFile, outputFile, password
+        );
+        
+        return runPython(script) == 0;
+    }
+    
+    /**
+     * Validate password strength
+     */
+    public static boolean validatePassword(String password) throws Exception {
+        String script = String.format(
+            "import sys\n" +
+            "sys.path.insert(0, '%s')\n" +
+            "from cortex_standalone import CortexCryptStandalone\n" +
+            "cc = CortexCryptStandalone()\n" +
+            "result = cc.validate_password_strength('%s')\n" +
+            "print(result)\n",
+            CORTEX_PATH, password
+        );
+        
+        String output = runPythonOutput(script);
+        return output.trim().equals("True");
+    }
+    
+    /**
+     * Get machine binding ID
+     */
+    public static String getMachineBinding() throws Exception {
+        String script = String.format(
+            "import sys\n" +
+            "sys.path.insert(0, '%s')\n" +
+            "from cortex_standalone import CortexCryptStandalone\n" +
+            "cc = CortexCryptStandalone()\n" +
+            "binding = cc.get_machine_binding()\n" +
+            "print(binding.hex())\n",
+            CORTEX_PATH
+        );
+        
+        return runPythonOutput(script).trim();
+    }
+    
+    private static int runPython(String script) throws Exception {
+        ProcessBuilder pb = new ProcessBuilder(PYTHON, "-c", script);
+        pb.redirectErrorStream(true);
+        Process p = pb.start();
+        
+        BufferedReader reader = new BufferedReader(
+            new InputStreamReader(p.getInputStream())
+        );
+        
+        String line;
+        while ((line = reader.readLine()) != null) {
+            System.out.println(line);
+        }
+        
+        return p.waitFor();
+    }
+    
+    private static String runPythonOutput(String script) throws Exception {
+        ProcessBuilder pb = new ProcessBuilder(PYTHON, "-c", script);
+        pb.redirectErrorStream(true);
+        Process p = pb.start();
+        
+        BufferedReader reader = new BufferedReader(
+            new InputStreamReader(p.getInputStream())
+        );
+        
+        StringBuilder output = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            output.append(line).append("\n");
+        }
+        
+        p.waitFor();
+        return output.toString();
+    }
+    
+    // =====================
+    // USAGE EXAMPLE
+    // =====================
+    
+    public static void main(String[] args) throws Exception {
+        String inputFile = "secret.txt";
+        String encryptedFile = "secret.cortex";
+        String decryptedFile = "decrypted.txt";
+        String password = "MyV3ryStr0ngP@ss!";
+        
+        // Encrypt
+        System.out.println("Encrypting...");
+        boolean encSuccess = encrypt(inputFile, encryptedFile, password, "machine");
+        System.out.println("Encrypted: " + encSuccess);
+        
+        // Decrypt
+        System.out.println("Decrypting...");
+        boolean decSuccess = decrypt(encryptedFile, decryptedFile, password);
+        System.out.println("Decrypted: " + decSuccess);
+        
+        // Validate password
+        System.out.println("Validating password...");
+        boolean isValid = validatePassword(password);
+        System.out.println("Valid: " + isValid);
+        
+        // Get machine binding
+        System.out.println("Getting machine binding...");
+        String binding = getMachineBinding();
+        System.out.println("Machine ID: " + binding);
+    }
+}
+```
+
+---
+
+### Method 4: Go (Golang)
+
+```go
+package main
+
+import (
+	"fmt"
+	"os/exec"
+	"strings"
+)
+
+const (
+	Python    = "python3"
+	CortexDir = "/path/to/cortexcrypto"
+)
+
+/*
+CortexCrypto Go Integration
+=========================
+*/
+
+// Encrypt encrypts a file using CortexCrypto
+func Encrypt(inputFile, outputFile, password, bindPolicy string) (int, error) {
+	script := fmt.Sprintf(`
+import sys
+sys.path.insert(0, '%s')
+from cortex_standalone import CortexCryptStandalone
+cc = CortexCryptStandalone()
+result = cc.encrypt_file('%s', '%s', '%s', '%s', '')
+print(result)
+`, CortexDir, inputFile, outputFile, password, bindPolicy)
+
+	cmd := exec.Command(Python, "-c", script)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return -1, err
+	}
+	
+	result := strings.TrimSpace(string(output))
+	return parseInt(result), nil
+}
+
+// Decrypt decrypts a file using CortexCrypto
+func Decrypt(inputFile, outputFile, password string) (int, error) {
+	script := fmt.Sprintf(`
+import sys
+sys.path.insert(0, '%s')
+from cortex_standalone import CortexCryptStandalone
+cc = CortexCryptStandalone()
+result = cc.decrypt_file('%s', '%s', '%s')
+print(result)
+`, CortexDir, inputFile, outputFile, password)
+
+	cmd := exec.Command(Python, "-c", script)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return -1, err
+	}
+	
+	result := strings.TrimSpace(string(output))
+	return parseInt(result), nil
+}
+
+// ValidatePassword checks if a password meets strength requirements
+func ValidatePassword(password string) (bool, error) {
+	script := fmt.Sprintf(`
+import sys
+sys.path.insert(0, '%s')
+from cortex_standalone import CortexCryptStandalone
+cc = CortexCryptStandalone()
+result = cc.validate_password_strength('%s')
+print(result)
+`, CortexDir, password)
+
+	cmd := exec.Command(Python, "-c", script)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return false, err
+	}
+	
+	return strings.TrimSpace(string(output)) == "True", nil
+}
+
+// GetMachineBinding returns the machine binding ID
+func GetMachineBinding() (string, error) {
+	script := fmt.Sprintf(`
+import sys
+sys.path.insert(0, '%s')
+from cortex_standalone import CortexCryptStandalone
+cc = CortexCryptStandalone()
+binding = cc.get_machine_binding()
+print(binding.hex())
+`, CortexDir)
+
+	cmd := exec.Command(Python, "-c", script)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", err
+	}
+	
+	return strings.TrimSpace(string(output)), nil
+}
+
+func parseInt(s string) int {
+	var n int
+	fmt.Sscanf(s, "%d", &n)
+	return n
+}
+
+func main() {
+	// Example usage
+	fmt.Println("=== CortexCrypto Go Example ===")
+	
+	// Encrypt
+	result, err := Encrypt("secret.txt", "secret.cortex", "MyV3ryStr0ngP@ss!", "machine")
+	fmt.Printf("Encrypt result: %d, error: %v\n", result, err)
+	
+	// Decrypt
+	result, err = Decrypt("secret.cortex", "decrypted.txt", "MyV3ryStr0ngP@ss!")
+	fmt.Printf("Decrypt result: %d, error: %v\n", result, err)
+	
+	// Validate password
+	valid, err := ValidatePassword("MyV3ryStr0ngP@ss!")
+	fmt.Printf("Password valid: %v, error: %v\n", valid, err)
+	
+	// Get machine binding
+	binding, err := GetMachineBinding()
+	fmt.Printf("Machine binding: %s, error: %v\n", binding, err)
+}
+```
+
+---
+
+### Method 5: Ruby
+
+```ruby
+#!/usr/bin/env ruby
+require 'open3'
+
+# CortexCrypto Ruby Integration
+# ========================
+
+CORTEX_PATH = '/path/to/cortexcrypto'
+PYTHON = 'python3'
+
+module CortexCrypto
+  class << self
+    # Encrypt a file
+    def encrypt(input_file, output_file, password, bind_policy = 'machine')
+      script = <<~PYTHON
+        import sys
+        sys.path.insert(0, '#{CORTEX_PATH}')
+        from cortex_standalone import CortexCryptStandalone
+        cc = CortexCryptStandalone()
+        result = cc.encrypt_file('#{input_file}', '#{output_file}', '#{password}', '#{bind_policy}', '')
+        print(result)
+      PYTHON
+      
+      run_python(script)
+    end
+    
+    # Decrypt a file
+    def decrypt(input_file, output_file, password)
+      script = <<~PYTHON
+        import sys
+        sys.path.insert(0, '#{CORTEX_PATH}')
+        from cortex_standalone import CortexCryptStandalone
+        cc = CortexCryptStandalone()
+        result = cc.decrypt_file('#{input_file}', '#{output_file}', '#{password}')
+        print(result)
+      PYTHON
+      
+      run_python(script)
+    end
+    
+    # Validate password strength
+    def validate_password(password)
+      script = <<~PYTHON
+        import sys
+        sys.path.insert(0, '#{CORTEX_PATH}')
+        from cortex_standalone import CortexCryptStandalone
+        cc = CortexCryptStandalone()
+        result = cc.validate_password_strength('#{password}')
+        print(result)
+      PYTHON
+      
+      output = run_python(script)
+      output.strip == 'True'
+    end
+    
+    # Get machine binding
+    def machine_binding
+      script = <<~PYTHON
+        import sys
+        sys.path.insert(0, '#{CORTEX_PATH}')
+        from cortex_standalone import CortexCryptStandalone
+        cc = CortexCryptStandalone()
+        binding = cc.get_machine_binding()
+        print(binding.hex())
+      PYTHON
+      
+      run_python(script).strip
+    end
+    
+    private
+    
+    def run_python(script)
+      stdout, stderr, status = Open3.capture3(PYTHON, '-c', script)
+      puts stderr unless stderr.empty?
+      stdout
+    end
+  end
+end
+
+# =====================
+# USAGE EXAMPLES
+# =====================
+
+puts "CortexCrypto Ruby Examples"
+
+# Encrypt
+result = CortexCrypto.encrypt('secret.txt', 'secret.cortex', 'MyV3ryStr0ngP@ss!', 'machine')
+puts "Encrypt: #{result}"
+
+# Decrypt
+result = CortexCrypto.decrypt('secret.cortex', 'decrypted.txt', 'MyV3ryStr0ngP@ss!')
+puts "Decrypt: #{result}"
+
+# Validate password
+valid = CortexCrypto.validate_password('MyV3ryStr0ngP@ss!')
+puts "Password valid: #{valid}"
+
+# Get machine binding
+binding = CortexCrypto.machine_binding
+puts "Machine binding: #{binding}"
+```
+
+---
+
+### Method 6: PHP
+
+```php
+<?php
+/**
+ * CortexCrypto PHP Integration
+ * ======================
+ */
+
+const CORTEX_PATH = '/path/to/cortexcrypto';
+const PYTHON = 'python3';
+
+class CortexCrypto {
+    
+    /**
+     * Encrypt a file
+     */
+    public static function encrypt(
+        string $inputFile,
+        string $outputFile,
+        string $password,
+        string $bindPolicy = 'machine'
+    ): int {
+        $script = sprintf(
+            "import sys\nsys.path.insert(0, '%s')\nfrom cortex_standalone import CortexCryptStandalone\ncc = CortexCryptStandalone()\nresult = cc.encrypt_file('%s', '%s', '%s', '%s', '')\nprint(result)",
+            CORTEX_PATH, $inputFile, $outputFile, $password, $bindPolicy
+        );
+        
+        return self::runPython($script);
+    }
+    
+    /**
+     * Decrypt a file
+     */
+    public static function decrypt(
+        string $inputFile,
+        string $outputFile,
+        string $password
+    ): int {
+        $script = sprintf(
+            "import sys\nsys.path.insert(0, '%s')\nfrom cortex_standalone import CortexCryptStandalone\ncc = CortexCryptStandalone()\nresult = cc.decrypt_file('%s', '%s', '%s')\nprint(result)",
+            CORTEX_PATH, $inputFile, $outputFile, $password
+        );
+        
+        return self::runPython($script);
+    }
+    
+    /**
+     * Validate password strength
+     */
+    public static function validatePassword(string $password): bool {
+        $script = sprintf(
+            "import sys\nsys.path.insert(0, '%s')\nfrom cortex_standalone import CortexCryptStandalone\ncc = CortexCryptStandalone()\nresult = cc.validate_password_strength('%s')\nprint(result)",
+            CORTEX_PATH, $password
+        );
+        
+        $output = self::runPythonOutput($script);
+        return trim($output) === 'True';
+    }
+    
+    /**
+     * Get machine binding ID
+     */
+    public static function getMachineBinding(): string {
+        $script = sprintf(
+            "import sys\nsys.path.insert(0, '%s')\nfrom cortex_standalone import CortexCryptStandalone\ncc = CortexCryptStandalone()\nbinding = cc.get_machine_binding()\nprint(binding.hex())",
+            CORTEX_PATH
+        );
+        
+        return trim(self::runPythonOutput($script));
+    }
+    
+    private static function runPython(string $script): int {
+        $descriptorSpec = [
+            0 => ["pipe", "r"],
+            1 => ["pipe", "w"],
+            2 => ["pipe", "w"]
+        ];
+        
+        $process = proc_open([PYTHON, '-c', $script], $descriptorSpec, $pipes);
+        
+        if (!is_resource($process)) {
+            return -1;
+        }
+        
+        fclose($pipes[0]);
+        $output = stream_get_contents($pipes[1]);
+        fclose($pipes[1]);
+        $error = stream_get_contents($pipes[2]);
+        fclose($pipes[2]);
+        
+        $returnValue = proc_close($process);
+        
+        return $returnValue;
+    }
+    
+    private static function runPythonOutput(string $script): string {
+        $descriptorSpec = [
+            0 => ["pipe", "r"],
+            1 => ["pipe", "w"],
+            2 => ["pipe", "w"]
+        ];
+        
+        $process = proc_open([PYTHON, '-c', $script], $descriptorSpec, $pipes);
+        
+        if (!is_resource($process)) {
+            return "";
+        }
+        
+        fclose($pipes[0]);
+        $output = stream_get_contents($pipes[1]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        
+        proc_close($process);
+        
+        return $output;
+    }
+}
+
+// =====================
+// USAGE EXAMPLES
+// =====================
+
+echo "CortexCrypto PHP Examples\n";
+
+// Encrypt
+$result = CortexCrypto::encrypt(
+    'secret.txt',
+    'secret.cortex',
+    'MyV3ryStr0ngP@ss!',
+    'machine'
+);
+echo "Encrypt result: $result\n";
+
+// Decrypt
+$result = CortexCrypto::decrypt(
+    'secret.cortex',
+    'decrypted.txt',
+    'MyV3ryStr0ngP@ss!'
+);
+echo "Decrypt result: $result\n";
+
+// Validate password
+$valid = CortexCrypto::validatePassword('MyV3ryStr0ngP@ss!');
+echo "Password valid: " . ($valid ? 'true' : 'false') . "\n";
+
+// Get machine binding
+$binding = CortexCrypto::getMachineBinding();
+echo "Machine binding: $binding\n";
+```
+
+---
+
+### Method 7: C# (.NET)
+
+```csharp
+using System;
+using System.Diagnostics;
+
+/*
+CortexCrypto C# Integration
+==========================
+*/
+
+public class CortexCrypto
+{
+    private const string Python = "python3";
+    private const string CortexPath = "/path/to/cortexcrypto";
+    
+    /// <summary>
+    /// Encrypt a file using CortexCrypto
+    /// </summary>
+    public static int Encrypt(
+        string inputFile,
+        string outputFile,
+        string password,
+        string bindPolicy = "machine"
+    )
+    {
+        string script = $@"
+import sys
+sys.path.insert(0, '{CortexPath}')
+from cortex_standalone import CortexCryptStandalone
+cc = CortexCryptStandalone()
+result = cc.encrypt_file('{inputFile}', '{outputFile}', '{password}', '{bindPolicy}', '')
+print(result)
+";
+        
+        return RunPython(script);
+    }
+    
+    /// <summary>
+    /// Decrypt a file using CortexCrypto
+    /// </summary>
+    public static int Decrypt(
+        string inputFile,
+        string outputFile,
+        string password
+    )
+    {
+        string script = $@"
+import sys
+sys.path.insert(0, '{CortexPath}')
+from cortex_standalone import CortexCryptStandalone
+cc = CortexCryptStandalone()
+result = cc.decrypt_file('{inputFile}', '{outputFile}', '{password}')
+print(result)
+";
+        
+        return RunPython(script);
+    }
+    
+    /// <summary>
+    /// Validate password strength
+    /// </summary>
+    public static bool ValidatePassword(string password)
+    {
+        string script = $@"
+import sys
+sys.path.insert(0, '{CortexPath}')
+from cortex_standalone import CortexCryptStandalone
+cc = CortexCryptStandalone()
+result = cc.validate_password_strength('{password}')
+print(result)
+";
+        
+        string output = RunPythonOutput(script);
+        return output.Trim() == "True";
+    }
+    
+    /// <summary>
+    /// Get machine binding ID
+    /// </summary>
+    public static string GetMachineBinding()
+    {
+        string script = $@"
+import sys
+sys.path.insert(0, '{CortexPath}')
+from cortex_standalone import CortexCryptStandalone
+cc = CortexCryptStandalone()
+binding = cc.get_machine_binding()
+print(binding.hex())
+";
+        
+        return RunPythonOutput(script).Trim();
+    }
+    
+    private static int RunPython(string script)
+    {
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = Python,
+            Arguments = $"-c \"{script.Replace("\"", "\\\"")}\"",
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            CreateNoWindow = true
+        };
+        
+        using var process = Process.Start(startInfo);
+        process.WaitForExit();
+        
+        return process.ExitCode;
+    }
+    
+    private static string RunPythonOutput(string script)
+    {
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = Python,
+            Arguments = $"-c \"{script.Replace("\"", "\\\"")}\"",
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            CreateNoWindow = true
+        };
+        
+        using var process = Process.Start(startInfo);
+        string output = process.StandardOutput.ReadToEnd();
+        process.WaitForExit();
+        
+        return output;
+    }
+    
+    // =====================
+    // USAGE EXAMPLE
+    // =====================
+    
+    public static void Main()
+    {
+        Console.WriteLine("CortexCrypto C# Examples");
+        
+        // Encrypt
+        int result = Encrypt("secret.txt", "secret.cortex", "MyV3ryStr0ngP@ss!", "machine");
+        Console.WriteLine($"Encrypt: {result}");
+        
+        // Decrypt
+        result = Decrypt("secret.cortex", "decrypted.txt", "MyV3ryStr0ngP@ss!");
+        Console.WriteLine($"Decrypt: {result}");
+        
+        // Validate password
+        bool valid = ValidatePassword("MyV3ryStr0ngP@ss!");
+        Console.WriteLine($"Valid: {valid}");
+        
+        // Get machine binding
+        string binding = GetMachineBinding();
+        Console.WriteLine($"Machine binding: {binding}");
+    }
+}
+```
+
+---
+
+### Method 8: Command Line (Shell/Bash)
+
+```bash
+#!/bin/bash
+#
+# CortexCrypto Command Line Examples
+# ===============================
+
+CORTEX_PATH="/path/to/cortexcrypto"
+PYTHON="python3"
+
+# =====================
+# BASIC OPERATIONS
+# =====================
+
+# Encrypt a file
+encrypt() {
+    local input="$1"
+    local output="$2"
+    local password="$3"
+    local bind_policy="${4:-machine}"
+    
+    $PYTHON -c "
+import sys
+sys.path.insert(0, '$CORTEX_PATH')
+from cortex_standalone import CortexCryptStandalone
+cc = CortexCryptStandalone()
+result = cc.encrypt_file('$input', '$output', '$password', '$bind_policy', '')
+print(result)
+"
+}
+
+# Decrypt a file
+decrypt() {
+    local input="$1"
+    local output="$2"
+    local password="$3"
+    
+    $PYTHON -c "
+import sys
+sys.path.insert(0, '$CORTEX_PATH')
+from cortex_standalone import CortexCryptStandalone
+cc = CortexCryptStandalone()
+result = cc.decrypt_file('$input', '$output', '$password')
+print(result)
+"
+}
+
+# Validate password
+validate_password() {
+    local password="$1"
+    
+    $PYTHON -c "
+import sys
+sys.path.insert(0, '$CORTEX_PATH')
+from cortex_standalone import CortexCryptStandalone
+cc = CortexCryptStandalone()
+result = cc.validate_password_strength('$password')
+print(result)
+"
+}
+
+# Get machine binding
+get_binding() {
+    $PYTHON -c "
+import sys
+sys.path.insert(0, '$CORTEX_PATH')
+from cortex_standalone import CortexCryptStandalone
+cc = CortexCryptStandalone()
+binding = cc.get_machine_binding()
+print(binding.hex())
+"
+}
+
+# =====================
+# USAGE EXAMPLES
+# =====================
+
+echo "CortexCrypto Shell Examples"
+
+# Encrypt
+result=$(encrypt "secret.txt" "secret.cortex" "MyV3ryStr0ngP@ss!" "machine")
+echo "Encrypt: $result"
+
+# Decrypt
+result=$(decrypt "secret.cortex" "decrypted.txt" "MyV3ryStr0ngP@ss!")
+echo "Decrypt: $result"
+
+# Validate password
+valid=$(validate_password "MyV3ryStr0ngP@ss!")
+echo "Valid: $valid"
+
+# Get machine binding
+binding=$(get_binding)
+echo "Machine binding: $binding"
+```
+
+---
+
+## 🎯 Quick Reference
+
+| Language | Method | Difficulty |
+|----------|--------|------------|
+| Python | Direct import | ⭐ Easy |
+| Node.js | child_process | ⭐⭐ Easy |
+| Java | ProcessBuilder | ⭐⭐ Medium |
+| Go | exec.Command | ⭐⭐ Medium |
+| Ruby | Open3 | ⭐ Easy |
+| PHP | proc_open | ⭐⭐ Medium |
+| C# | Process | ⭐⭐ Medium |
+| Bash | subprocess | ⭐ Easy |
+
+**Best Practice**: For production, use the Python library directly or create a daemon service that all languages can communicate with via IPC/REST API.
+
+---
+
+**🎉 This is the complete multi-language integration guide for CortexCrypto!**
+
+*Every method demonstrated with working code examples!*

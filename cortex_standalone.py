@@ -5,14 +5,25 @@ CortexCrypt Standalone Mode - Neural Augmented Encryption without Daemon
 
 import os
 import sys
+import json
 import hashlib
 import math
 import argparse
+import re
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 import secrets
+
+def _escape_json_string(s: str) -> str:
+    """Safely escape string for JSON embedding - prevents injection attacks"""
+    if not isinstance(s, str):
+        s = str(s)
+    # Remove any existing control characters and escape JSON special chars
+    s = re.sub(r'[\x00-\x1f\x7f]', '', s)  # Remove control chars
+    s = s.replace('\\', '\\\\').replace('"', '\\"')
+    return s
 
 class CortexCryptStandalone:
     """
@@ -298,17 +309,17 @@ class CortexCryptStandalone:
         ciphertext = encryptor.update(plaintext) + encryptor.finalize()
         auth_tag = encryptor.tag
         
-        # Create full metadata
+        # Create full metadata (with JSON injection protection)
         import time
         metadata = {
-            "filename": os.path.basename(input_path),
+            "filename": _escape_json_string(os.path.basename(input_path)),
             "timestamp": int(time.time()),
             "original_size": len(plaintext),
             "version": "1.0",
-            "note": note,
+            "note": _escape_json_string(note),
             "bind_policy": bind_policy
         }
-        metadata_json = str(metadata).replace("'", '"').encode()
+        metadata_json = json.dumps(metadata).encode()
         
         # Write .cortex file with proper TLV format (matching CLI)
         with open(output_path, 'wb') as f:
