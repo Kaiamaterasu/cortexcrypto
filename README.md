@@ -572,7 +572,6 @@ See `RULES.md` for detailed development guidelines.
 
 Licensed under the Apache License, Version 2.0. See `LICENSE` for details.
 
-**Zero-cost commitment**: CortexCrypt will always use only free, open-source dependencies to ensure accessibility for security researchers and developers worldwide.
 
 ---
 
