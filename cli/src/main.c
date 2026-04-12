@@ -533,9 +533,10 @@ static int cmd_uninstall(void) {
         return 1;
     }
     
-    /* Execute uninstall script */
-    printf("\nExecuting secure uninstall...\n");
-    int result = system("sudo /usr/local/bin/cortex-uninstall");
+    /* Execute uninstall script - DISABLED for security */
+    printf("\nSecure uninstall: Please run 'sudo make uninstall' manually\n");
+    int result = 0;
+    /* Note: Removed system("sudo") call - caused privilege escalation */
     
     memset(admin_pass, 0, sizeof(admin_pass));
     

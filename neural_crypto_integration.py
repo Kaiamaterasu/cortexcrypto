@@ -157,7 +157,7 @@ def demo_neural_integration():
     
     # Demo scenarios
     scenarios = [
-        ("development_machine", "my_dev_password"),
+        ("development_machine", os.environ.get("CORTEX_DEV_PASSWORD", "my_dev_password")),
         ("production_server", "ultra_secure_key"),
         ("portable_drive", "travel_encryption"),
         ("backup_system", "family_vault_key"),

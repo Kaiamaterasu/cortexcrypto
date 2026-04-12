@@ -82,7 +82,7 @@ static int create_socket_server(void) {
     }
     
     /* Set socket permissions */
-    chmod(DAEMON_SOCKET_PATH, 0666);
+    chmod(DAEMON_SOCKET_PATH, 0600);
     
     if (listen(fd, 10) < 0) {
         syslog(LOG_ERR, "Failed to listen on socket: %s", strerror(errno));
@@ -98,7 +98,7 @@ static void handle_client_request(int client_fd, const char* request) {
     char response[512] = {0};
     
     if (strncmp(request, "PING", 4) == 0) {
-        strcpy(response, "PONG");
+        snprintf(response, 64, "PONG");
     } else if (strncmp(request, "GET_ANOMALY_SCORE", 17) == 0) {
         float score = daemon_get_anomaly_score(&g_daemon);
         snprintf(response, sizeof(response), "%.6f", score);
@@ -109,12 +109,12 @@ static void handle_client_request(int client_fd, const char* request) {
                 daemon_get_anomaly_score(&g_daemon));
     } else if (strncmp(request, "RELOAD_MODELS", 13) == 0) {
         if (daemon_reload_models(&g_daemon) == 0) {
-            strcpy(response, "OK");
+            snprintf(response, 64, "OK");
         } else {
-            strcpy(response, "ERROR");
+            snprintf(response, 64, "ERROR");
         }
     } else {
-        strcpy(response, "UNKNOWN_COMMAND");
+        snprintf(response, 64, "UNKNOWN_COMMAND");
     }
     
     send(client_fd, response, strlen(response), 0);
