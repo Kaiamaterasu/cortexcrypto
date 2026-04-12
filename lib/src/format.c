@@ -62,6 +62,8 @@ static int parse_tlvs(const uint8_t* data, size_t len, cortex_header_t* header) 
         switch (type) {
         case TLV_FILE_META:
             if (tlv_len > 1024) return -1; /* Limit file meta size */
+            /* SECURITY FIX: Free existing pointer to prevent memory leak on duplicate */
+            if (header->file_meta_json) free(header->file_meta_json);
             header->file_meta_json = malloc(tlv_len + 1);
             if (!header->file_meta_json) return -1;
             memcpy(header->file_meta_json, &data[pos], tlv_len);
@@ -70,6 +72,8 @@ static int parse_tlvs(const uint8_t* data, size_t len, cortex_header_t* header) 
             
         case TLV_POLICY:
             if (tlv_len > 512) return -1; /* Limit policy size */
+            /* SECURITY FIX: Free existing pointer to prevent memory leak on duplicate */
+            if (header->policy_json) free(header->policy_json);
             header->policy_json = malloc(tlv_len + 1);
             if (!header->policy_json) return -1;
             memcpy(header->policy_json, &data[pos], tlv_len);
@@ -78,6 +82,8 @@ static int parse_tlvs(const uint8_t* data, size_t len, cortex_header_t* header) 
             
         case TLV_NOTE:
             if (tlv_len > 2048) return -1; /* Limit note size */
+            /* SECURITY FIX: Free existing pointer to prevent memory leak on duplicate */
+            if (header->note) free(header->note);
             header->note = malloc(tlv_len + 1);
             if (!header->note) return -1;
             memcpy(header->note, &data[pos], tlv_len);
@@ -85,8 +91,9 @@ static int parse_tlvs(const uint8_t* data, size_t len, cortex_header_t* header) 
             break;
             
         case TLV_LEARNING_META:
-            /* Store opaque encrypted learning metadata */
             if (tlv_len > 0) {
+                /* SECURITY FIX: Free existing pointer to prevent memory leak on duplicate */
+                if (header->learning_meta) free(header->learning_meta);
                 header->learning_meta = malloc(tlv_len);
                 if (!header->learning_meta) return -1;
                 memcpy(header->learning_meta, &data[pos], tlv_len);
@@ -446,22 +453,54 @@ int cortex_is_cortex_file(const char* path) {
     return strcmp(path + len - 7, ".cortex") == 0;
 }
 
-/* Generate default file metadata JSON */
+/* Escape string for safe JSON embedding - prevents injection attacks */
+static char* escape_json_string(const char* input) {
+    if (!input) return strdup("");
+    
+    /* First, measure escaped length */
+    size_t escaped_len = 0;
+    for (const char* p = input; *p; p++) {
+        if (*p == '"' || *p == '\\') escaped_len += 2;  /* Escape quote/backslash */
+        else if (*p >= 0 && *p < 32) escaped_len++;    /* Skip control chars */
+        else escaped_len++;
+    }
+    
+    char* output = malloc(escaped_len + 1);
+    if (!output) return strdup("");
+    
+    char* dest = output;
+    for (const char* p = input; *p; p++) {
+        if (*p == '"') {
+            *dest++ = '\\'; *dest++ = '"';
+        } else if (*p == '\\') {
+            *dest++ = '\\'; *dest++ = '\\';
+        } else if (*p >= 0 && *p < 32) {
+            /* Skip control characters */
+        } else {
+            *dest++ = *p;
+        }
+    }
+    *dest = '\0';
+    
+    return output;
+}
+
+/* Generate default file metadata JSON (with JSON injection protection) */
 char* cortex_generate_file_meta(const char* filename, const char* original_path) {
     char* json = malloc(1024);
     if (!json) return NULL;
     
-    /* Get current timestamp */
     time_t now = time(NULL);
     
-    /* Get file size if original exists */
     struct stat st;
     size_t original_size = 0;
     if (original_path && stat(original_path, &st) == 0) {
         original_size = st.st_size;
     }
     
-    /* Simple JSON generation (sufficient for metadata) */
+    /* Escape filename to prevent JSON injection */
+    char* safe_filename = escape_json_string(filename ? filename : "unknown");
+    
     snprintf(json, 1024, 
         "{"
         "\"filename\":\"%s\","
@@ -469,18 +508,22 @@ char* cortex_generate_file_meta(const char* filename, const char* original_path)
         "\"original_size\":%zu,"
         "\"version\":\"1.0\""
         "}", 
-        filename ? filename : "unknown",
+        safe_filename,
         now,
         original_size
     );
     
+    free(safe_filename);
     return json;
 }
 
-/* Generate default policy JSON */
+/* Generate default policy JSON (with JSON injection protection) */
 char* cortex_generate_policy(int max_retries, const char* lock_action) {
     char* json = malloc(512);
     if (!json) return NULL;
+    
+    /* Escape lock_action to prevent JSON injection */
+    char* safe_action = escape_json_string(lock_action ? lock_action : "exponential_backoff");
     
     snprintf(json, 512,
         "{"
@@ -490,8 +533,9 @@ char* cortex_generate_policy(int max_retries, const char* lock_action) {
         "\"require_admin_unlock\":true"
         "}",
         max_retries,
-        lock_action ? lock_action : "exponential_backoff"
+        safe_action
     );
     
+    free(safe_action);
     return json;
 }

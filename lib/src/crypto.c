@@ -258,25 +258,27 @@ cleanup:
     return ret;
 }
 
-/* XChaCha20-Poly1305 encryption (simplified implementation) */
+/* XChaCha20-Poly1305 encryption (NOT IMPLEMENTED - fail securely) */
 static int xchacha20_poly1305_encrypt(const uint8_t* key, const uint8_t* nonce,
                                      const uint8_t* plaintext, size_t plaintext_len,
                                      const uint8_t* aad, size_t aad_len,
                                      uint8_t* ciphertext, uint8_t tag[16]) {
-    /* For now, fall back to AES-GCM if XChaCha20 not available */
-    /* In a complete implementation, this would use libsodium */
-    return aes_gcm_encrypt(key, nonce, 12, plaintext, plaintext_len, 
-                          aad, aad_len, ciphertext, tag);
+    /* SECURITY FIX: Do NOT silently fall back to AES-GCM */
+    /* This would cause nonce truncation and security downgrade */
+    fprintf(stderr, "Error: XChaCha20-Poly1305 requested but not implemented.\n");
+    fprintf(stderr, "Use --cipher aes for AES-256-GCM instead.\n");
+    return -1;
 }
 
-/* XChaCha20-Poly1305 decryption */
+/* XChaCha20-Poly1305 decryption (NOT IMPLEMENTED - fail securely) */
 static int xchacha20_poly1305_decrypt(const uint8_t* key, const uint8_t* nonce,
                                      const uint8_t* ciphertext, size_t ciphertext_len,
                                      const uint8_t* aad, size_t aad_len,
                                      const uint8_t tag[16], uint8_t* plaintext) {
-    /* For now, fall back to AES-GCM if XChaCha20 not available */
-    return aes_gcm_decrypt(key, nonce, 12, ciphertext, ciphertext_len,
-                          aad, aad_len, tag, plaintext);
+    /* SECURITY FIX: Do NOT silently fall back to AES-GCM */
+    fprintf(stderr, "Error: XChaCha20-Poly1305 requested but not implemented.\n");
+    fprintf(stderr, "Use --cipher aes for AES-256-GCM instead.\n");
+    return -1;
 }
 
 /* Main AEAD encryption function */
