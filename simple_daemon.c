@@ -27,13 +27,13 @@ void handle_request(int client_fd, const char* request) {
     printf("Received request: %s\n", request);
     
     if (strncmp(request, "PING", 4) == 0) {
-        strcpy(response, "PONG");
+        snprintf(response, 64, "PONG");
     } else if (strncmp(request, "GET_ANOMALY_SCORE", 17) == 0) {
-        strcpy(response, "0.15");  // Return low, safe anomaly score
+        snprintf(response, 64, "0.15");  // Return low, safe anomaly score
     } else if (strncmp(request, "GET_STATUS", 10) == 0) {
-        strcpy(response, "daemon_pid=1234,uptime=100,anomaly_score=0.15");
+        snprintf(response, 64, "daemon_pid=1234,uptime=100,anomaly_score=0.15");
     } else {
-        strcpy(response, "UNKNOWN_COMMAND");
+        snprintf(response, 64, "UNKNOWN_COMMAND");
     }
     
     printf("Sending response: %s\n", response);
