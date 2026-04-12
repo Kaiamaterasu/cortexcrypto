@@ -88,6 +88,16 @@ class CortexCryptStandalone:
             print("⚠️  Password has repeating characters")
             return False
         
+        # Check if password looks like a file path
+        if '/' in password or '\\' in password or password.startswith('.'):
+            print("⚠️  Password cannot contain path separators")
+            return False
+        
+        # Check for null bytes or control characters
+        if any(ord(c) < 32 for c in password):
+            print("⚠️  Password contains invalid characters")
+            return False
+        
         # Check for sequential characters (e.g., 'abcdefgh' or '12345678')
         # Only reject if password is mostly sequential (4+ chars in sequence)
         lower = password.lower()
