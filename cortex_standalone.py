@@ -108,38 +108,105 @@ class CortexCryptStandalone:
         """Validate password meets minimum strength requirements"""
         
         weak_passwords = [
+            # Top 100 most common passwords
             '123456', 'password', '12345678', 'qwerty', '123456789',
             '12345', '1234', '111111', '1234567', 'dragon', 'letmein',
             'admin', 'welcome', 'monkey', 'master', 'abc123', '0000',
             'pass', 'test', 'guest', 'shadow', 'sunshine', 'princess',
             'football', 'baseball', 'soccer', 'killer', 'trustno1',
-            'iloveyou', 'superman', 'batman', 'passw0rd', 'hello',
-            # Additional weak patterns
+            'iloveyou', 'superman', 'batman', 'passw0rd', 'hello', 'rockyou',
+            'cookie', 'cheese', 'poop', 'fuckoff', 'blahblah', 'solo',
+            'mustang', 'pokemon', 'slayer', 'bubbles', 'bailey', 'buster',
+            'summer', 'liverpool', 'arsenal', 'chelsea', 'manutd', 'rangers',
+            # Repeating characters
             'aaaaaaaa', 'bbbbbbbb', 'cccccccc', 'dddddddd', 'eeeeeeee',
             'aaaaaaaaaaaa', '11111111', '22222222', 'password1', 'password12',
-            # Common patterns
-            'qwertyuiop', 'asdfghjkl', 'zxcvbnm', 'qazwsxedc',
+            # Keyboard patterns
+            'qwertyuiop', 'asdfghjkl', 'zxcvbnm', 'qazwsxedc', 'zaq12wsx',
+            'qweasdzxc', 'qweasd', 'qwe123', 'asd123', 'zxc123',
             # Common names
-            'michael', 'jennifer', 'jordan', 'ashley', 'daniel',
+            'michael', 'jennifer', 'jordan', 'ashley', 'daniel', 'thomas',
+            'natalie', 'brianna', 'joshua', 'andrea', 'jordan', 'matthew',
             # Year patterns
             'password2020', 'password2021', 'password2022', 'password2023', 'password2024',
             'admin2020', 'admin2021', 'admin2022', 'admin2023', 'admin2024',
-            '1234567890', '0987654321',
+            '1234567890', '0987654321', '19901991', '19911992', '19921993',
             # Leetspeak variants
             'p@ssw0rd', 'p@ssword', 'p@ssw0rd123', 'p@ssword123',
             's3cr3t', 's3cr3t123', 'S3cr3t', 'S3cr3t123',
             'l0g1n', 'l0g1n123', 'L0g1n', 'L0g1n123',
             '1qaz2wsx', '1qazwsx', 'qazwsxedc', 'qazwsx',
-            # More word + number patterns
+            # Word + number patterns
             'root1234', 'admin1234', 'user1234', 'test1234', 'guest1234',
             'shadow1', 'sunshine1', 'dragon1', 'princess1', 'butterfly1',
-            'pizza123', 'coffee123', 'chocolate', 'chocolate1', 'purple1',
-            'tiger1',
-            # OS and software names
-            'windows10', 'windows11', 'macos', 'ubuntu', 'linux',
+            'pizza123', 'coffee123', 'chocolate', 'chocolate1', 'purple1', 'tiger1',
+            # OS and software
+            'windows10', 'windows11', 'macos', 'ubuntu', 'linux', 'debian',
             'chrome', 'firefox', 'safari', 'edge', 'opera',
             'oracle', 'mysql', 'sqlserver', 'postgresql', 'mongodb',
-            'google', 'facebook', 'twitter', 'instagram', 'youtube',
+            'google', 'facebook', 'twitter', 'instagram', 'youtube', 'netflix',
+            # Dictionary words
+            'apple', 'banana', 'orange', 'grape', 'lemon', 'lime', 'mango', 'peach',
+            'coffee', 'milk', 'water', 'bread', 'cheese', 'pizza', 'burger', 'fries',
+            'pasta', 'rice', 'soup', 'salad', 'chicken', 'beef', 'pork', 'fish', 'meat',
+            # Animals
+            'dog', 'cat', 'bird', 'fish', 'lion', 'tiger', 'bear', 'wolf', 'monkey', 'snake',
+            'dogcat', 'catdog', 'wolfpack', 'corgi', 'husky', 'shepherd', 'bulldog',
+            # Colors
+            'red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink',
+            'black', 'white', 'silver', 'golden', 'brown', 'navy', 'coral',
+            # Days/Months
+            'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday',
+            'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august',
+            'september', 'october', 'november', 'december',
+            # Brands
+            'nike', 'adidas', 'puma', 'gucci', 'prada', 'chanel', 'dior',
+            'cocacola', 'pepsi', 'starbucks', 'mcdonalds', 'kfc', 'burgerking',
+            # Movies
+            'starwars', 'harrypotter', 'gameofthrones', 'breakingbad', 'avengers', 'joker',
+            # Sports
+            'football', 'baseball', 'soccer', 'basketball', 'tennis', 'golf',
+            'hockey', 'boxing', 'wrestling', 'cricket', 'rugby', 'volleyball',
+            # Cars
+            'toyota', 'honda', 'ford', 'bmw', 'benz', 'audi', 'ferrari',
+            'lamborghini', 'porsche', 'mustang', 'camaro', 'charger', 'corvette',
+            # Games
+            'minecraft', 'fortnite', 'cod', 'csgo', 'dota', 'lol', 'ow', 'apex',
+            'pubg', 'valorant', 'genshin', 'roblox', 'amongus', 'AmongUs',
+            # Music
+            'eminem', 'drake', 'beyonce', 'taylorswift', 'bieber', 'queen',
+            'metallica', 'nirvana', 'acdc', 'u2', 'linkinpark', 'green_day',
+            # Tech
+            'microsoft', 'amazon', 'apple', 'intel', 'amd', 'nvidia', 'sony', 'samsung',
+            # Programming
+            'python', 'java', 'javascript', 'csharp', 'cpp', 'ruby', 'golang',
+            'rust', 'swift', 'kotlin', 'php', 'perl', 'typescript',
+            # More leetspeak
+            'n00b', 'h4x0r', 'l33t', 'pr0', 'z3r0', 'h4ck3r',
+            'xbl4d3', 'p4ssw0rd', 's3cur3', 'k3yb0ard', 'b4ckd00r',
+            # Years
+            '1990', '1991', '1992', '1993', '1994', '1995', '1996', '1997', '1998', '1999',
+            '2000', '2001', '2002', '2003', '2004', '2005', '2006', '2007', '2008', '2009',
+            '2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019',
+            '2020', '2021', '2022', '2023', '2024',
+            # Family
+            'mommy', 'daddy', 'mom', 'dad', 'sister', 'brother', 'family',
+            'parents', 'grandma', 'grandpa', 'uncle', 'aunt', 'cousin', 'nephew', 'niece',
+            # Simple patterns
+            'loveyou', 'iloveyou', 'love123', 'iloveyou1', 'loveyou2',
+            'hateyou', 'fuckyou', 'goodbye', 'hello', 'helloworld',
+            # Shortcuts
+            'root', 'toor', 'pass', 'test', 'temp', 'default', 'changeme',
+            'keepout', 'masterkey', 'qwerty123', 'asdf1234', 'zxcv1234',
+            '1qaz1234', '2wsx1234', 'passw0rd1', 'passw0rd12',
+            # Special char + base
+            'pass!', 'pass@', 'pass#', 'pass$', 'pass%', 'pass^', 'pass&', 'pass*',
+            'test!', 'test@', 'test#', 'test$',
+            'admin!', 'admin@', 'root!', 'root@', 'user!', 'user@',
+            # Popular words
+            'letmein', 'login', 'admin', 'root', 'user', 'guest', 'master',
+            'secret', 'super', 'welcome', 'hello', 'world', 'blue', 'black',
+            'white', 'green', 'red', 'yellow', 'pink', 'silver', 'golden',
         ]
         
         # Check minimum length
@@ -180,7 +247,28 @@ class CortexCryptStandalone:
                             'lisa1990', 'nancy1990', 'betty1990', 'margaret1990',
                             'sandra1990', 'ashley1990', 'kimberly1990', 'emily1990',
                             'john123', 'mary123', 'james123', 'robert123', 'michael123',
-                            'david123', 'william123', 'richard123', 'joseph123', 'thomas123']
+                            'david123', 'william123', 'richard123', 'joseph123', 'thomas123',
+                            # Word + 2-digit patterns (e.g., dragon01)
+                            'dragon01', 'shadow01', 'sunshine01', 'princess01', 'butterfly01',
+                            'minecraft1', 'fortnite1', 'starwars01',
+                            # Word + number (generic)
+                            'nike1234', 'eminem01', 'monday01', 'red12345', 'blue12345',
+                            'green123', 'yellow123', 'pink123', 'black123', 'white123',
+                            # Sports + number
+                            'football1', 'baseball1', 'soccer1', 'basketball1',
+                            # Food + number
+                            'chicken1', 'pizza1', 'burger1', 'coffee1', 'pasta1',
+                            # Car brands + number
+                            'toyota1', 'honda1', 'ford1', 'bmw1', 'audi1',
+                            # Music + number
+                            'eminem1', 'drake1', 'beyonce1', 'queen1',
+                            # Day + number
+                            'monday1', 'tuesday1', 'wednesday1', 'thursday1', 'friday1',
+                            'saturday1', 'sunday1',
+                            # Month + number  
+                            'january1', 'february1', 'march1', 'april1', 'may1', 'june1',
+                            'july1', 'august1', 'september1', 'october1', 'november1', 'december1',
+        ]
         if password.lower() in word_num_patterns:
             print("⚠️  Password is a common word with numbers")
             return False
