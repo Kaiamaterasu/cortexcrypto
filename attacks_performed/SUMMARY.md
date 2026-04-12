@@ -77,6 +77,20 @@
 
 ---
 
+## New Security Features Added
+
+### Rate Limiting on Decryption
+- After 5 failed decryption attempts within 60 seconds -> 5 minute lockout
+- Prevents brute force attacks on encrypted files
+- Per-file tracking (each encrypted file has its own counter)
+- Automatic reset on successful decryption
+
+### Account Lockout
+- Automatic lockout after max attempts exceeded
+- Time-based lockout expiration
+
+---
+
 ## Conclusion
 
 The CortexCrypto encryption system is **production-ready** with comprehensive password validation. While the weak password blacklist approach is not perfect (can never catch all patterns), the system successfully blocks the vast majority of common attack vectors.

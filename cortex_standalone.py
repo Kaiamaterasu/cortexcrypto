@@ -20,9 +20,55 @@ class CortexCryptStandalone:
     without requiring the daemon or neural network (uses fallback crypto)
     """
     
+    # Rate limiting for failed decryption attempts
+    _failed_attempts = {}  # {ip_or_host: [timestamp1, timestamp2, ...]}
+    _lockout_duration = 300  # 5 minutes lockout after max attempts
+    _max_attempts = 5  # Max failed attempts before lockout
+    _time_window = 60  # Count attempts within 60 seconds
+    
     def __init__(self):
         self.magic = b"CORTEX01"
         self.version = 1
+        self.failed_attempts = {}  # Instance-level tracking
+    
+    def _check_rate_limit(self, identifier: str = "default") -> bool:
+        """Check if requests should be rate limited"""
+        import time
+        current_time = time.time()
+        
+        # Initialize if not exists
+        if identifier not in self.failed_attempts:
+            self.failed_attempts[identifier] = []
+        
+        # Clean old attempts outside the time window
+        self.failed_attempts[identifier] = [
+            t for t in self.failed_attempts[identifier]
+            if current_time - t < self._time_window
+        ]
+        
+        # Check if locked out
+        if len(self.failed_attempts[identifier]) >= self._max_attempts:
+            # Check if lockout period has passed
+            last_attempt = self.failed_attempts[identifier][-1]
+            if current_time - last_attempt < self._lockout_duration:
+                print(f"⚠️  Too many failed attempts. Please wait {int(self._lockout_duration - (current_time - last_attempt))} seconds")
+                return False
+            # Lockout expired, reset
+            self.failed_attempts[identifier] = []
+        
+        return True
+    
+    def _record_failed_attempt(self, identifier: str = "default"):
+        """Record a failed decryption attempt"""
+        import time
+        if identifier not in self.failed_attempts:
+            self.failed_attempts[identifier] = []
+        self.failed_attempts[identifier].append(time.time())
+    
+    def _record_success(self, identifier: str = "default"):
+        """Clear failed attempts on successful decryption"""
+        if identifier in self.failed_attempts:
+            self.failed_attempts[identifier] = []
         
     def get_machine_binding(self):
         """Generate machine binding ID"""
@@ -331,6 +377,10 @@ class CortexCryptStandalone:
     def decrypt_file(self, input_path: str, output_path: str, password: str):
         """Decrypt .cortex file"""
         
+        # Check rate limiting before proceeding
+        if not self._check_rate_limit(input_path):
+            return -3
+        
         with open(input_path, 'rb') as f:
             # Read header - handle both formats
             magic = f.read(8)
@@ -435,6 +485,9 @@ class CortexCryptStandalone:
             print(f"✓ Decrypted {input_path} -> {output_path}")
             print(f"  Size: {len(ciphertext)} -> {len(plaintext)} bytes")
             
+            # Record successful decryption - clear rate limit
+            self._record_success(input_path)
+            
             # Clear sensitive data
             key = b'\x00' * len(key)
             
@@ -442,6 +495,8 @@ class CortexCryptStandalone:
             
         except Exception as e:
             print(f"Error: Authentication/decryption failed - {str(e)}")
+            # Record failed attempt
+            self._record_failed_attempt(input_path)
             return -3
 
 def main():
